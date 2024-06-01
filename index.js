@@ -21,6 +21,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     const userCollection = client.db("fitnessTracker").collection("users");
+    const trainerCollection = client.db("fitnessTracker").collection("trainers");
     app.post("/users", async (req, res) => {
       const user = req.body;
       const query = { email: user.email };
@@ -33,7 +34,19 @@ async function run() {
     });
 
 
-  
+    app.delete("/users/:id", async(req,res) => {
+      const id = req.res.id;
+      const query = {_id : new ObjectId(id)};
+      const result = await userCollection.deleteOne(query);
+      res.send(result);
+    })
+
+  app.post("/addtrainer",async(req,res)=>{
+    const addTrainer =  req.body;
+    const result = await trainerCollection.insertOne(addTrainer);
+    res.send(result);
+
+  });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
