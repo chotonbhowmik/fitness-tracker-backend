@@ -54,6 +54,12 @@ async function run() {
     res.send(result)
   })
 
+  app.get('/alltrainer/:id', async(req,res) => {
+    const id = req.params.id;
+    const query = {_id : new ObjectId(id)};
+    const result = await trainerCollection.findOne(query);
+    res.send(result)
+  })
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
