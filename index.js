@@ -22,6 +22,9 @@ async function run() {
   try {
     const userCollection = client.db("fitnessTracker").collection("users");
     const trainerCollection = client.db("fitnessTracker").collection("trainers");
+    const newsletterCollection = client
+      .db("fitnessTracker")
+      .collection("newsletter");
     app.post("/users", async (req, res) => {
       const user = req.body;
       const query = { email: user.email };
@@ -60,6 +63,11 @@ async function run() {
     const result = await trainerCollection.findOne(query);
     res.send(result)
   })
+   app.post("/newsletter", async (req, res) => {
+     const addTrainer = req.body;
+     const result = await newsletterCollection.insertOne(addTrainer);
+     res.send(result);
+   });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
