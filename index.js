@@ -25,8 +25,10 @@ async function run() {
     const newsletterCollection = client
       .db("fitnessTracker")
       .collection("newsletter");
+
     app.post("/users", async (req, res) => {
       const user = req.body;
+      console.log("Received user data:", user);
       const query = { email: user.email };
       const existingUser = await userCollection.findOne(query);
       if (existingUser) {
@@ -52,10 +54,51 @@ async function run() {
   });
 
   app.get('/alltrainer', async(req,res) =>{
-    const cursor = trainerCollection.find();
+    const query = { status: "complete" }; 
+    const cursor = trainerCollection.find(query);
     const result = await cursor.toArray();
     res.send(result)
   })
+   app.get("/alltrainer/pending", async (req, res) => {
+    //  const pendingStatus = "pending"; 
+     const query = { status: "pending" }; 
+     const cursor = trainerCollection.find(query);
+     const trainers = await cursor.toArray();
+     res.send(trainers);
+   });
+
+app.get("/alltrainer/complete", async(req,res) => {
+  const query = { status: "complete"};
+  const cursor = trainerCollection.find(query);
+  const allTrainer = await cursor.toArray();
+  res.send(allTrainer);
+})
+
+   app.patch("/users/alltrainer/:id", async (req, res) => {
+     const id = req.params.id;
+     const filter = { _id: new ObjectId(id) };
+     const updatedDoc = {
+       $set: {
+         role: "trainer",
+         status:"complete"
+       },
+     };
+     const result = await trainerCollection.updateOne(filter, updatedDoc);
+     res.send(result);
+   });
+     app.patch("/users/delete/:id", async (req, res) => {
+       const id = req.params.id;
+       const filter = { _id: new ObjectId(id) };
+       const updatedDoc = {
+         $set: {
+           role: "user",
+           status: "pending",
+         },
+       };
+       const result = await trainerCollection.updateOne(filter, updatedDoc);
+       res.send(result);
+     });
+   
 
   app.get('/alltrainer/:id', async(req,res) => {
     const id = req.params.id;
@@ -63,11 +106,17 @@ async function run() {
     const result = await trainerCollection.findOne(query);
     res.send(result)
   })
+ 
    app.post("/newsletter", async (req, res) => {
      const addTrainer = req.body;
      const result = await newsletterCollection.insertOne(addTrainer);
      res.send(result);
    });
+   app.get("/allnewsletter", async(req,res) => {
+    const cursor = newsletterCollection.find();
+    const result = await cursor.toArray();
+    res.send(result);
+   })
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
