@@ -25,7 +25,7 @@ async function run() {
     const newsletterCollection = client
       .db("fitnessTracker")
       .collection("newsletter");
-
+const classCollection = client.db("fitnessTracker").collection("classes");
     app.post("/users", async (req, res) => {
       const user = req.body;
       console.log("Received user data:", user);
@@ -117,6 +117,11 @@ app.get("/alltrainer/complete", async(req,res) => {
     const result = await cursor.toArray();
     res.send(result);
    })
+    app.post("/addclass", async (req, res) => {
+      const addTrainer = req.body;
+      const result = await classCollection.insertOne(addTrainer);
+      res.send(result);
+    });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
