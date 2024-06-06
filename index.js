@@ -21,11 +21,13 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     const userCollection = client.db("fitnessTracker").collection("users");
-    const trainerCollection = client.db("fitnessTracker").collection("trainers");
+    const trainerCollection = client
+      .db("fitnessTracker")
+      .collection("trainers");
     const newsletterCollection = client
       .db("fitnessTracker")
       .collection("newsletter");
-const classCollection = client.db("fitnessTracker").collection("classes");
+    const classCollection = client.db("fitnessTracker").collection("classes");
     app.post("/users", async (req, res) => {
       const user = req.body;
       console.log("Received user data:", user);
@@ -38,90 +40,95 @@ const classCollection = client.db("fitnessTracker").collection("classes");
       res.send(result);
     });
 
-
-    app.delete("/users/:id", async(req,res) => {
+    app.delete("/users/:id", async (req, res) => {
       const id = req.res.id;
-      const query = {_id : new ObjectId(id)};
+      const query = { _id: new ObjectId(id) };
       const result = await userCollection.deleteOne(query);
       res.send(result);
-    })
+    });
 
-  app.post("/addtrainer",async(req,res)=>{
-    const addTrainer =  req.body;
-    const result = await trainerCollection.insertOne(addTrainer);
-    res.send(result);
+    app.post("/addtrainer", async (req, res) => {
+      const addTrainer = req.body;
+      const result = await trainerCollection.insertOne(addTrainer);
+      res.send(result);
+    });
 
-  });
+    app.get("/alltrainer", async (req, res) => {
+      const query = { status: "complete" };
+      const cursor = trainerCollection.find(query);
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+    app.get("/alltrainer/pending", async (req, res) => {
+      //  const pendingStatus = "pending";
+      const query = { status: "pending" };
+      const cursor = trainerCollection.find(query);
+      const trainers = await cursor.toArray();
+      res.send(trainers);
+    });
 
-  app.get('/alltrainer', async(req,res) =>{
-    const query = { status: "complete" }; 
-    const cursor = trainerCollection.find(query);
-    const result = await cursor.toArray();
-    res.send(result)
-  })
-   app.get("/alltrainer/pending", async (req, res) => {
-    //  const pendingStatus = "pending"; 
-     const query = { status: "pending" }; 
-     const cursor = trainerCollection.find(query);
-     const trainers = await cursor.toArray();
-     res.send(trainers);
-   });
+    app.get("/alltrainer/complete", async (req, res) => {
+      const query = { status: "complete" };
+      const cursor = trainerCollection.find(query);
+      const allTrainer = await cursor.toArray();
+      res.send(allTrainer);
+    });
 
-app.get("/alltrainer/complete", async(req,res) => {
-  const query = { status: "complete"};
-  const cursor = trainerCollection.find(query);
-  const allTrainer = await cursor.toArray();
-  res.send(allTrainer);
-})
+    app.patch("/users/alltrainer/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updatedDoc = {
+        $set: {
+          role: "trainer",
+          status: "complete",
+        },
+      };
+      const result = await trainerCollection.updateOne(filter, updatedDoc);
+      res.send(result);
+    });
+    app.patch("/users/delete/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updatedDoc = {
+        $set: {
+          role: "user",
+          status: "pending",
+        },
+      };
+      const result = await trainerCollection.updateOne(filter, updatedDoc);
+      res.send(result);
+    });
 
-   app.patch("/users/alltrainer/:id", async (req, res) => {
-     const id = req.params.id;
-     const filter = { _id: new ObjectId(id) };
-     const updatedDoc = {
-       $set: {
-         role: "trainer",
-         status:"complete"
-       },
-     };
-     const result = await trainerCollection.updateOne(filter, updatedDoc);
-     res.send(result);
-   });
-     app.patch("/users/delete/:id", async (req, res) => {
-       const id = req.params.id;
-       const filter = { _id: new ObjectId(id) };
-       const updatedDoc = {
-         $set: {
-           role: "user",
-           status: "pending",
-         },
-       };
-       const result = await trainerCollection.updateOne(filter, updatedDoc);
-       res.send(result);
-     });
-   
+    app.get("/alltrainer/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await trainerCollection.findOne(query);
+      res.send(result);
+    });
 
-  app.get('/alltrainer/:id', async(req,res) => {
-    const id = req.params.id;
-    const query = {_id : new ObjectId(id)};
-    const result = await trainerCollection.findOne(query);
-    res.send(result)
-  })
- 
-   app.post("/newsletter", async (req, res) => {
-     const addTrainer = req.body;
-     const result = await newsletterCollection.insertOne(addTrainer);
-     res.send(result);
-   });
-   app.get("/allnewsletter", async(req,res) => {
-    const cursor = newsletterCollection.find();
-    const result = await cursor.toArray();
-    res.send(result);
-   })
+    app.post("/newsletter", async (req, res) => {
+      const addTrainer = req.body;
+      const result = await newsletterCollection.insertOne(addTrainer);
+      res.send(result);
+    });
+    app.get("/allnewsletter", async (req, res) => {
+      const cursor = newsletterCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    });
     app.post("/addclass", async (req, res) => {
       const addTrainer = req.body;
       const result = await classCollection.insertOne(addTrainer);
       res.send(result);
     });
+
+    app.get("/allclass", async (req,res) => {
+      const cursor = classCollection.find();
+      const response = await cursor.toArray();
+      res.send(response);
+
+    })
+
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
