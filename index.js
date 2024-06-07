@@ -28,6 +28,8 @@ async function run() {
       .db("fitnessTracker")
       .collection("newsletter");
     const classCollection = client.db("fitnessTracker").collection("classes");
+    const forumCollection = client.db("fitnessTracker").collection("forums");
+
     app.post("/users", async (req, res) => {
       const user = req.body;
       console.log("Received user data:", user);
@@ -39,6 +41,12 @@ async function run() {
       const result = await userCollection.insertOne(user);
       res.send(result);
     });
+     app.get("/alluser", async (req, res) => {
+       const cursor = userCollection.find();
+       const result = await cursor.toArray();
+       res.send(result);
+     });
+    
 
     app.delete("/users/:id", async (req, res) => {
       const id = req.res.id;
@@ -127,6 +135,12 @@ async function run() {
       const response = await cursor.toArray();
       res.send(response);
 
+    })
+
+    app.post("/addforum", async(req,res) => {
+      const addForum = req.body;
+      const result = await forumCollection.insertOne(addForum);
+      res.send(result)
     })
 
     console.log(
