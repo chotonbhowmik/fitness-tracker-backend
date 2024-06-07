@@ -143,6 +143,24 @@ async function run() {
       res.send(result)
     })
 
+      app.get("/allforum", async (req, res) => {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 6;
+        const skip = (page-1) * limit;
+        try{
+        const cursor = forumCollection.find().skip(skip).limit(limit);
+        const total = await forumCollection.countDocuments()
+        const forums = await cursor.toArray();
+        res.json({
+          forums,total,page,
+          pages: Math.ceil(total/limit),
+        })
+        }catch(error){
+          res.status(500).json({ error: "Server error" });
+        }
+
+        
+      });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
