@@ -47,6 +47,20 @@ async function run() {
        res.send(result);
      });
     
+     app.patch("/users/alluser/:id", async (req, res) => {
+       const id = req.params.id;
+       const filter = { _id: new ObjectId(id) };
+       const updatedDoc = {
+         $set: {
+           role: "trainer",
+           
+         },
+       };
+       const result = await userCollection.updateOne(filter, updatedDoc);
+       res.send(result);
+     });
+
+
 
     app.delete("/users/:id", async (req, res) => {
       const id = req.res.id;
