@@ -29,7 +29,7 @@ async function run() {
       .collection("newsletter");
     const classCollection = client.db("fitnessTracker").collection("classes");
     const forumCollection = client.db("fitnessTracker").collection("forums");
-
+    // user api start from here
     app.post("/users", async (req, res) => {
       const user = req.body;
       console.log("Received user data:", user);
@@ -41,26 +41,23 @@ async function run() {
       const result = await userCollection.insertOne(user);
       res.send(result);
     });
-     app.get("/alluser", async (req, res) => {
-       const cursor = userCollection.find();
-       const result = await cursor.toArray();
-       res.send(result);
-     });
-    
-     app.patch("/users/alluser/:id", async (req, res) => {
-       const id = req.params.id;
-       const filter = { _id: new ObjectId(id) };
-       const updatedDoc = {
-         $set: {
-           role: "trainer",
-           
-         },
-       };
-       const result = await userCollection.updateOne(filter, updatedDoc);
-       res.send(result);
-     });
+    app.get("/alluser", async (req, res) => {
+      const cursor = userCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    });
 
-
+    app.patch("/users/alluser/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updatedDoc = {
+        $set: {
+          role: "trainer",
+        },
+      };
+      const result = await userCollection.updateOne(filter, updatedDoc);
+      res.send(result);
+    });
 
     app.delete("/users/:id", async (req, res) => {
       const id = req.res.id;
@@ -68,6 +65,33 @@ async function run() {
       const result = await userCollection.deleteOne(query);
       res.send(result);
     });
+     app.patch("/users/alltrainer/:id", async (req, res) => {
+       const id = req.params.id;
+       const filter = { _id: new ObjectId(id) };
+       const updatedDoc = {
+         $set: {
+           role: "trainer",
+           status: "complete",
+         },
+       };
+       const result = await trainerCollection.updateOne(filter, updatedDoc);
+       res.send(result);
+     });
+     app.patch("/users/delete/:id", async (req, res) => {
+       const id = req.params.id;
+       const filter = { _id: new ObjectId(id) };
+       const updatedDoc = {
+         $set: {
+           role: "user",
+           status: "pending",
+         },
+       };
+       const result = await trainerCollection.updateOne(filter, updatedDoc);
+       res.send(result);
+     });
+
+
+    // user api start end here
 
     app.post("/addtrainer", async (req, res) => {
       const addTrainer = req.body;
@@ -96,31 +120,7 @@ async function run() {
       res.send(allTrainer);
     });
 
-    app.patch("/users/alltrainer/:id", async (req, res) => {
-      const id = req.params.id;
-      const filter = { _id: new ObjectId(id) };
-      const updatedDoc = {
-        $set: {
-          role: "trainer",
-          status: "complete",
-        },
-      };
-      const result = await trainerCollection.updateOne(filter, updatedDoc);
-      res.send(result);
-    });
-    app.patch("/users/delete/:id", async (req, res) => {
-      const id = req.params.id;
-      const filter = { _id: new ObjectId(id) };
-      const updatedDoc = {
-        $set: {
-          role: "user",
-          status: "pending",
-        },
-      };
-      const result = await trainerCollection.updateOne(filter, updatedDoc);
-      res.send(result);
-    });
-
+   
     app.get("/alltrainer/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
@@ -144,37 +144,36 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/allclass", async (req,res) => {
+    app.get("/allclass", async (req, res) => {
       const cursor = classCollection.find();
       const response = await cursor.toArray();
       res.send(response);
+    });
 
-    })
-
-    app.post("/addforum", async(req,res) => {
+    app.post("/addforum", async (req, res) => {
       const addForum = req.body;
       const result = await forumCollection.insertOne(addForum);
-      res.send(result)
-    })
+      res.send(result);
+    });
 
-      app.get("/allforum", async (req, res) => {
-        const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 6;
-        const skip = (page-1) * limit;
-        try{
+    app.get("/allforum", async (req, res) => {
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 6;
+      const skip = (page - 1) * limit;
+      try {
         const cursor = forumCollection.find().skip(skip).limit(limit);
-        const total = await forumCollection.countDocuments()
+        const total = await forumCollection.countDocuments();
         const forums = await cursor.toArray();
         res.json({
-          forums,total,page,
-          pages: Math.ceil(total/limit),
-        })
-        }catch(error){
-          res.status(500).json({ error: "Server error" });
-        }
-
-        
-      });
+          forums,
+          total,
+          page,
+          pages: Math.ceil(total / limit),
+        });
+      } catch (error) {
+        res.status(500).json({ error: "Server error" });
+      }
+    });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
