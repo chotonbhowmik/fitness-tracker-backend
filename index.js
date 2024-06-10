@@ -29,6 +29,8 @@ async function run() {
       .collection("newsletter");
     const classCollection = client.db("fitnessTracker").collection("classes");
     const forumCollection = client.db("fitnessTracker").collection("forums");
+    const paymentCollection = client.db("fitnessTracker").collection("payment");
+
     // user api start from here
     app.post("/users", async (req, res) => {
       const user = req.body;
@@ -174,6 +176,27 @@ async function run() {
         res.status(500).json({ error: "Server error" });
       }
     });
+
+// payment api
+app.post("/payment", async (req, res) => {
+  const paymentData = req.body;
+  const result = await paymentCollection.insertOne(paymentData);
+  res.send(result);
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
