@@ -30,6 +30,7 @@ async function run() {
     const classCollection = client.db("fitnessTracker").collection("classes");
     const forumCollection = client.db("fitnessTracker").collection("forums");
     const paymentCollection = client.db("fitnessTracker").collection("payment");
+    const slotCollection = client.db("fitnessTracker").collection("slot");
 
     // user api start from here
     app.post("/users", async (req, res) => {
@@ -183,6 +184,32 @@ app.post("/payment", async (req, res) => {
   const result = await paymentCollection.insertOne(paymentData);
   res.send(result);
 });
+
+ 
+
+ app.get("/getpaymentdata", async(req,res) => {
+  const cursor = paymentCollection.find();
+  const response = await cursor.toArray();
+  res.send(response);
+ })
+// slot api
+  app.post("/addslot", async (req, res) => {
+    const addSlotData = req.body;
+    const result = await slotCollection.insertOne(addSlotData);
+    res.send(result);
+  });
+  
+ app.get("/allslot", async (req, res) => {
+   const cursor = slotCollection.find();
+   const response = await cursor.toArray();
+   res.send(response);
+ });
+ app.delete("/slot/:id", async (req, res) => {
+   const id = req.params.id; // Corrected
+   const query = { _id: new ObjectId(id) };
+   const result = await slotCollection.deleteOne(query);
+   res.send(result);
+ });
 
 
 
