@@ -147,17 +147,31 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/allclass", async (req, res) => {
-      const cursor = classCollection.find();
-      const response = await cursor.toArray();
-      res.send(response);
-    });
+   
 
     app.post("/addforum", async (req, res) => {
       const addForum = req.body;
       const result = await forumCollection.insertOne(addForum);
       res.send(result);
     });
+     app.get("/allclass", async (req, res) => {
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 6;
+      const skip = (page - 1) * limit;
+      try {
+        const cursor = classCollection.find().skip(skip).limit(limit);
+        const total = await classCollection.countDocuments();
+        const response = await cursor.toArray();
+        res.json({
+          response,
+          total,
+          page,
+          pages: Math.ceil(total / limit),
+        });
+      } catch (error) {
+        res.status(500).json({ error: "Server error" });
+      }
+     });
 
     app.get("/allforum", async (req, res) => {
       const page = parseInt(req.query.page) || 1;
